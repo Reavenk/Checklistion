@@ -7,7 +7,7 @@ using System.Text;
 namespace Checklistion.Checklist
 {
     // TODO: Docstring
-    struct Entry
+    public struct Entry
     {
         public System.IO.FileInfo file;
         public uint fileline;

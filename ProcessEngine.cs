@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Checklistion
 {
-    class ProcessEngine
+    public class ProcessEngine
     {
         HashSet<string> supportedExts = new HashSet<string>();
 
