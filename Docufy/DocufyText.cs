@@ -8,6 +8,10 @@ namespace Checklistion.Docufy
     // > ☐ DOCU_TEXT_0613af08f14a : Checklistion has a solution to output a raw text checklist (via DocufyText).
     class DocufyText : IDocufy
     {
+        public const string ID = "rawtext";
+
+        string IDocufy.ID => DocufyText.ID;
+
         public bool compact = false;
 
         public DocufyText(bool compact)
@@ -50,5 +54,7 @@ namespace Checklistion.Docufy
             textOut.Close();
             return true;
         }
+
+        HashSet<string> IDocufy.SupportedExts => new HashSet<string>{"txt"};
     }
 }

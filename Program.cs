@@ -14,14 +14,26 @@ namespace Checklistion
             bool showHelp = false;                                  // If true, show help (and exit)
             bool spitSymbol = false;                                // Show the checkbox symbol (and exit)
             bool processDir = true;                                 // If false, don't do any actual scanning work and extraction work.
+            bool onlyFilesLeft = false;
             HashSet<string> formats = new HashSet<string>();        // Formats to support
+            string implID = "";
 
             for (int ia = 0; ia < args.Length; ++ia)
             { 
                 if(args[ia].Length == 0)
                     continue; // Sanity check
 
-                if (args[ia] == "-h" || args[ia] == "--help")
+                if (!args[ia].StartsWith("-") || onlyFilesLeft)
+                {
+                    // If not a flag or a parameter to a flag, it's a directory to target.
+                    // TODO: Handle specific files also?
+                    dirsToProcess.Add(args[ia]);
+                }
+                else if(args[ia] == "--")
+                { 
+                    onlyFilesLeft = true;
+                }
+                else if(args[ia] == "-h" || args[ia] == "--help")
                 {
                     // > ☐ CMD_LIST_357f8e43fa84 : Command line parameter --help shows help.
                     // > ☐ CMD_LIST_c91c68e61af8 : Command line parameter -h shows help.
@@ -62,11 +74,10 @@ namespace Checklistion
                         formats.Add(args[ia].ToLower());
                     }
                 }
-                else if(!args[ia].StartsWith("-")) 
+                else if( args[ia] == "--impl")
                 {
-                    // If not a flag or a parameter to a flag, it's a directory to target.
-                    // TODO: Handle specific files also?
-                    dirsToProcess.Add(args[ia]);
+                    ++ia;
+                    implID = args[ia];
                 }
             }
 
@@ -94,15 +105,40 @@ namespace Checklistion
                 processDir = false;
             }
 
-            for(int i = 0; i < numToGen; ++i)
+            if(numToGen > 0)
             {
-                string guid = System.Guid.NewGuid().ToString();
-                string id = guid.Substring(guid.Length - 12);
-                Console.WriteLine("> ☐ CAT_SUB_" + id + ": --");
+                SpitGeneratedExamples(numToGen);
                 processDir = false;
             }
 
-            if(processDir == false)
+            //////////////////////////////////////////////////
+            //
+            //  DECIDE IMPLEMENTATION
+            //
+            //////////////////////////////////////////////////
+            Dictionary<string, Docufy.IDocufy> supportedImpls = GenerateSupportedImplementationRegistry();
+            Docufy.IDocufy impl = new Docufy.DocufyText(false);
+
+            if (!string.IsNullOrEmpty(implID))
+            { 
+                Console.WriteLine("Specified implementation " + implID + ".");
+                if(supportedImpls.ContainsKey(implID))
+                { 
+                    impl = supportedImpls[implID];
+                    Console.WriteLine("Switched to implementation " + impl.ID + ".");
+                }
+                else
+                { 
+                    Console.WriteLine("ERROR: Implementation " + implID + " is not a known id, using default " + impl.ID + ".");
+                }
+            }
+            else
+                Console.WriteLine("Using default implementation " + impl.ID + ".");
+
+
+            //////////////////////////////////////////////////
+
+                if (processDir == false)
                 return;
 
             if (dirsToProcess.Count == 0)
@@ -130,8 +166,39 @@ namespace Checklistion
             processEngine.Validate();
             processEngine.ProcessAllDirectories();
 
-            Checklistion.Docufy.IDocufy docuf = new Checklistion.Docufy.DocufyText(true);
-            docuf.WriteChecklist("out.txt", processEngine);
+            impl.WriteChecklist("out.txt", processEngine);
+        }
+
+        static bool RegisterImplementation(
+            Dictionary<string, Docufy.IDocufy> register,
+            Docufy.IDocufy newDocufy)
+        { 
+            if(register.ContainsKey(newDocufy.ID))
+                return false;
+
+            register.Add(newDocufy.ID, newDocufy);
+            return true;
+        }
+
+        static void SpitGeneratedExamples(int num)
+        {
+            for (int i = 0; i < num; ++i)
+            {
+                string guid = System.Guid.NewGuid().ToString();
+                string id = guid.Substring(guid.Length - 12);
+                Console.WriteLine("> ☐ CAT_SUB_" + id + ": --");
+            }
+        }
+
+        static Dictionary<string, Docufy.IDocufy> GenerateSupportedImplementationRegistry()
+        {
+            Dictionary<string, Docufy.IDocufy> retRegistry = 
+                new Dictionary<string, Docufy.IDocufy>();
+            //
+            RegisterImplementation(retRegistry, new Docufy.DocufyText(false));
+            RegisterImplementation(retRegistry, new Docufy.DocufyMarkdown());
+
+            return retRegistry;
         }
     }
 }

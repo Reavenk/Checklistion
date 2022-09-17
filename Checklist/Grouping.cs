@@ -5,7 +5,7 @@ using System.Text;
 namespace Checklistion.Checklist
 {
     // TODO: Docstring
-    class Grouping
+    public class Grouping
     {
         // TODO: Docstring
         public class Subgroup
