@@ -10,7 +10,7 @@ namespace Checklistion.Docufy
 
         string IDocufy.ID => DocufyMarkdown.ID;
 
-        bool IDocufy.WriteChecklist(string outFile, ProcessEngine processed)
+        bool IDocufy.WriteChecklist(string outFile, ProcessEngine processed, DocGenOptions opts)
         { 
             Checklist.Grouping grouping = processed.GenerateGrouping();
 
@@ -28,7 +28,12 @@ namespace Checklistion.Docufy
 
                     foreach(Checklist.Entry e in sIt.Value.entries)
                     { 
-                        textOut.WriteLine("* [ ] " + EscapeMarkdownString(e.requirement) + " &nbsp;[loc](" + e.file + ":" + e.fileline.ToString() + ")");
+                        textOut.Write("* [ ] " + EscapeMarkdownString(e.requirement));
+                        
+                        if(opts.verbose != DocGenOptions.Verbose.Compact)
+                            textOut.Write( " &nbsp;[loc](" + e.file + ":" + e.fileline.ToString() + ")");
+
+                        textOut.Write("\n");
                     }
                 }
             }

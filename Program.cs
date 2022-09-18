@@ -18,6 +18,8 @@ namespace Checklistion
             HashSet<string> formats = new HashSet<string>();        // Formats to support
             string implID = "";
 
+            Docufy.DocGenOptions opts = new Docufy.DocGenOptions();
+
             for (int ia = 0; ia < args.Length; ++ia)
             { 
                 if(args[ia].Length == 0)
@@ -40,7 +42,9 @@ namespace Checklistion
                     showHelp = true;
                 }
                 else if( args[ia][0] != '-')
+                {
                     dirsToProcess.Add(args[ia]);
+                }
                 else if( args[ia] == "--gen-entries")
                 { 
                     ++ia;
@@ -78,6 +82,10 @@ namespace Checklistion
                 {
                     ++ia;
                     implID = args[ia];
+                }
+                else if(args[ia] == "--compact")
+                {
+                    opts.verbose = Docufy.DocGenOptions.Verbose.Compact;
                 }
             }
 
@@ -117,7 +125,7 @@ namespace Checklistion
             //
             //////////////////////////////////////////////////
             Dictionary<string, Docufy.IDocufy> supportedImpls = GenerateSupportedImplementationRegistry();
-            Docufy.IDocufy impl = new Docufy.DocufyText(false);
+            Docufy.IDocufy impl = new Docufy.DocufyText();
 
             if (!string.IsNullOrEmpty(implID))
             { 
@@ -166,7 +174,7 @@ namespace Checklistion
             processEngine.Validate();
             processEngine.ProcessAllDirectories();
 
-            impl.WriteChecklist("out.txt", processEngine);
+            impl.WriteChecklist("out.txt", processEngine, opts);
         }
 
         static bool RegisterImplementation(
@@ -195,7 +203,7 @@ namespace Checklistion
             Dictionary<string, Docufy.IDocufy> retRegistry = 
                 new Dictionary<string, Docufy.IDocufy>();
             //
-            RegisterImplementation(retRegistry, new Docufy.DocufyText(false));
+            RegisterImplementation(retRegistry, new Docufy.DocufyText());
             RegisterImplementation(retRegistry, new Docufy.DocufyMarkdown());
 
             return retRegistry;

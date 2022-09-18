@@ -19,8 +19,9 @@ namespace Checklistion.Docufy
         /// <param name="processed">
         /// The extracted checklist data to format.
         /// </param>
+        /// <param name="opts">Various shared options on document generation.</param>
         /// <returns>True if success. Else, false.</returns>
-        public bool WriteChecklist(string outFile, ProcessEngine processed);
+        public bool WriteChecklist(string outFile, ProcessEngine processed, DocGenOptions opts);
 
         /// <summary>
         /// The supported saved file types supported by the implementation.

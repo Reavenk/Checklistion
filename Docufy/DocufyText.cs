@@ -12,14 +12,10 @@ namespace Checklistion.Docufy
 
         string IDocufy.ID => DocufyText.ID;
 
-        public bool compact = false;
+        public DocufyText()
+        {}
 
-        public DocufyText(bool compact)
-        { 
-            this.compact = compact;
-        }
-
-        bool IDocufy.WriteChecklist(string outFile, ProcessEngine processed)
+        bool IDocufy.WriteChecklist(string outFile, ProcessEngine processed, DocGenOptions opts)
         { 
             Checklist.Grouping grouping = processed.GenerateGrouping();
 
@@ -39,7 +35,7 @@ namespace Checklistion.Docufy
                         textOut.WriteLine("\t\t☐ " + e.requirement);
 
                         // > ☐ DOCU_TEXT_7edaace503bf : DocufyText has the ability to display a compact checklist.
-                        if (!this.compact)
+                        if (opts.verbose != Docufy.DocGenOptions.Verbose.Compact)
                         {
                             // > ☐ DOCU_TEXT_7edaace503bf : DocufyText has the ability to show checklist entry ids.
                             // > ☐ DOCU_TEXT_7c03a2baa2e9 : DocufyText has the ability to show checklist entry filepaths.
